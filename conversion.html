@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bwiki密探计算器材料转换工具</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❇️</text></svg>">
+    <style>
+        :root {
+            --gold-color: #FFD700;
+            --purple-color: #9C27B0;
+            --blue-color: #2196F3;
+            --yin-yang-color: #607D8B;
+            --wind-fire-color: #FF9800;
+            --earth-water-color: #009688;
+            --content-width: 500px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            background-color: #f5f5f5;
+            font-size: 14px;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: var(--content-width);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        /* 输入区域样式 */
+        .input-container {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        
+        .material-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .material-row {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+        }
+        
+        .material-row.gold {
+            background-color: rgba(255, 215, 0, 0.08);
+            border-left: 2px solid var(--gold-color);
+        }
+        
+        .material-row.purple {
+            background-color: rgba(156, 39, 176, 0.08);
+            border-left: 2px solid var(--purple-color);
+        }
+        
+        .material-row.blue {
+            background-color: rgba(33, 150, 243, 0.08);
+            border-left: 2px solid var(--blue-color);
+        }
+        
+        .material-name {
+            flex: 1;
+            padding-right: 10px;
+        }
+        
+        .material-input {
+            width: 70px;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        /* 按钮区域 */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-convert {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-convert:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-reset {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #d32f2f;
+        }
+        
+        /* 输出区域 */
+        .output-container {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        
+        .output-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-left: 8px;
+            border-left: 3px solid;
+        }
+        
+        .section-title.yin-yang {
+            border-color: var(--yin-yang-color);
+        }
+        
+        .section-title.wind-fire {
+            border-color: var(--wind-fire-color);
+        }
+        
+        .section-title.earth-water {
+            border-color: var(--earth-water-color);
+        }
+        
+        .items-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .item-card {
+            min-width: calc((100% - 40px) / 6); /* 6个卡片均分宽度 */
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            border-radius: 3px;
+            word-break: break-word;
+        }
+        
+        .item-name.gold {
+            background-color: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .item-name.purple {
+            background-color: rgba(156, 39, 176, 0.08);
+            border: 1px solid rgba(156, 39, 176, 0.2);
+        }
+        
+        .item-name.blue {
+            background-color: rgba(33, 150, 243, 0.08);
+            border: 1px solid rgba(33, 150, 243, 0.2);
+        }
+        
+        .item-value {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        
+        @media (max-width: 600px) {
+            :root {
+                --content-width: 100%;
+            }
+            
+            .item-card {
+                min-width: calc((100% - 24px) / 3); /* 小屏幕每行3个 */
+            }
+            
+            .material-input {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>材料转换工具</h1>
+        
+        <div class="input-container">
+            <div class="material-grid" id="materialInputs"></div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-convert" id="convertBtn">转换</button>
+            <button class="btn btn-reset" id="resetBtn">重置</button>
+        </div>
+        
+        <div class="output-container" id="outputSection"></div>
+    </div>
+
+    <script>
+        // 材料数据
+        const materials = [
+            { name: "星汉镜", type: "阴阳", level: "gold" },
+            { name: "水镜", type: "阴阳", level: "gold" },
+            { name: "悲回风扇", type: "风火", level: "gold" },
+            { name: "仙门扇", type: "风火", level: "gold" },
+            { name: "木兰坠露", type: "地水", level: "gold" },
+            { name: "霸王泪", type: "地水", level: "gold" },
+            { name: "宝石镜", type: "阴阳", level: "purple" },
+            { name: "鎏金镜", type: "阴阳", level: "purple" },
+            { name: "羽扇", type: "风火", level: "purple" },
+            { name: "金丝扇", type: "风火", level: "purple" },
+            { name: "灵山泉", type: "地水", level: "purple" },
+            { name: "百末旨酒", type: "地水", level: "purple" },
+            { name: "六博镜", type: "阴阳", level: "blue" },
+            { name: "铜镜", type: "阴阳", level: "blue" },
+            { name: "翠扇", type: "风火", level: "blue" },
+            { name: "绢扇", type: "风火", level: "blue" },
+            { name: "清酒", type: "地水", level: "blue" },
+            { name: "浊酒", type: "地水", level: "blue" }
+        ];
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            initInputs();
+            initOutput();
+            document.getElementById('convertBtn').addEventListener('click', convertMaterials);
+            document.getElementById('resetBtn').addEventListener('click', resetInputs);
+        });
+
+        function initInputs() {
+            const container = document.getElementById('materialInputs');
+            
+            materials.forEach(material => {
+                const row = document.createElement('div');
+                row.className = `material-row ${material.level}`;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'material-name';
+                nameSpan.textContent = material.name;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'material-input';
+                input.min = '0';
+                input.max = '99999';
+                input.value = '0';
+                input.dataset.type = material.type;
+                input.dataset.name = material.name;
+                input.dataset.level = material.level;
+                
+                row.appendChild(nameSpan);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        function initOutput() {
+            updateOutput();
+        }
+
+        function convertMaterials() {
+            updateOutput();
+        }
+
+        function updateOutput() {
+            const outputSection = document.getElementById('outputSection');
+            outputSection.innerHTML = '';
+            
+            // 按类型分组
+            const groupedData = {
+                '阴阳': { names: [], values: [], levels: [] },
+                '风火': { names: [], values: [], levels: [] },
+                '地水': { names: [], values: [], levels: [] }
+            };
+            
+            // 收集输入值
+            materials.forEach(material => {
+                const input = document.querySelector(`input[data-name="${material.name}"]`);
+                const value = input.value || '0';
+                
+                groupedData[material.type].names.push(material.name);
+                groupedData[material.type].values.push(value);
+                groupedData[material.type].levels.push(material.level);
+            });
+            
+            // 反转顺序
+            Object.values(groupedData).forEach(group => {
+                group.names.reverse();
+                group.values.reverse();
+                group.levels.reverse();
+            });
+            
+            // 创建输出
+            createOutputSections(groupedData);
+        }
+
+        function createOutputSections(data) {
+            const outputSection = document.getElementById('outputSection');
+            
+            // 按阴阳、风火、地水顺序创建区块
+            const sections = [
+                { type: '阴阳', class: 'yin-yang' },
+                { type: '风火', class: 'wind-fire' },
+                { type: '地水', class: 'earth-water' }
+            ];
+            
+            sections.forEach(section => {
+                const type = section.type;
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'output-section';
+                
+                // 标题
+                const title = document.createElement('div');
+                title.className = `section-title ${section.class}`;
+                title.textContent = `【${type}】`;
+                sectionDiv.appendChild(title);
+                
+                // 名称行
+                const nameRow = document.createElement('div');
+                nameRow.className = 'items-row';
+                data[type].names.forEach((name, i) => {
+                    const card = document.createElement('div');
+                    card.className = `item-card item-name ${data[type].levels[i]}`;
+                    card.textContent = name;
+                    nameRow.appendChild(card);
+                });
+                sectionDiv.appendChild(nameRow);
+                
+                // 数值行
+                const valueRow = document.createElement('div');
+                valueRow.className = 'items-row';
+                data[type].values.forEach(value => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card item-value';
+                    card.textContent = value;
+                    valueRow.appendChild(card);
+                });
+                sectionDiv.appendChild(valueRow);
+                
+                outputSection.appendChild(sectionDiv);
+            });
+        }
+
+        function resetInputs() {
+            document.querySelectorAll('.material-input').forEach(input => {
+                input.value = '0';
+            });
+            updateOutput();
+        }
+    </script>
+</body>
+</html>
